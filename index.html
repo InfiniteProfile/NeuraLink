@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neura Link</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #07070F;
+    --surface:   #0D0D1C;
+    --card:      #111126;
+    --border:    #1C1C38;
+    --accent:    #5B6EF5;
+    --accent2:   #00C8FF;
+    --glow:      rgba(91,110,245,.35);
+    --glow2:     rgba(0,200,255,.2);
+    --text:      #E2E4F0;
+    --muted:     #5A5A7A;
+    --white:     #FFFFFF;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── Neural background canvas ── */
+  #neural-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    opacity: .28;
+    pointer-events: none;
+  }
+
+  /* ── Header ── */
+  header {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.4rem 2.5rem;
+    border-bottom: 1px solid var(--border);
+    background: rgba(7,7,15,.85);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    position: sticky;
+    top: 0;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    text-decoration: none;
+  }
+  .brand-icon {
+    width: 34px; height: 34px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    box-shadow: 0 0 18px var(--glow);
+  }
+  .brand-icon svg { width: 18px; height: 18px; }
+  .brand-name {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: -.01em;
+    color: var(--white);
+  }
+  .brand-name span {
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .count-badge {
+    font-size: .72rem;
+    font-weight: 500;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: .28rem .75rem;
+  }
+  .count-badge span {
+    color: var(--accent2);
+    font-weight: 600;
+  }
+
+  /* ── Search ── */
+  .search-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .search-wrap svg {
+    position: absolute;
+    left: .65rem;
+    color: var(--muted);
+    width: 15px; height: 15px;
+    pointer-events: none;
+  }
+  #search {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: .45rem .75rem .45rem 2rem;
+    font-family: 'Inter', sans-serif;
+    font-size: .82rem;
+    color: var(--text);
+    width: 180px;
+    outline: none;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  #search::placeholder { color: var(--muted); }
+  #search:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(91,110,245,.15);
+  }
+
+  /* ── Hero strip ── */
+  .hero-strip {
+    position: relative;
+    z-index: 5;
+    padding: 3.5rem 2.5rem 2.5rem;
+    text-align: center;
+  }
+  .hero-eyebrow {
+    display: inline-block;
+    font-size: .72rem;
+    font-weight: 500;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--accent2);
+    margin-bottom: .9rem;
+  }
+  .hero-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(2rem, 5vw, 3.4rem);
+    font-weight: 700;
+    letter-spacing: -.03em;
+    line-height: 1.1;
+    color: var(--white);
+    margin-bottom: .9rem;
+  }
+  .hero-title .gradient-text {
+    background: linear-gradient(90deg, var(--accent) 0%, var(--accent2) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .hero-sub {
+    font-size: .92rem;
+    font-weight: 300;
+    color: var(--muted);
+    max-width: 420px;
+    margin: 0 auto;
+    line-height: 1.7;
+  }
+
+  /* ── Filter bar ── */
+  .filter-bar {
+    position: relative;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    padding: 0 2.5rem 1.8rem;
+    flex-wrap: wrap;
+  }
+  .filter-label {
+    font-size: .72rem;
+    font-weight: 500;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-right: .4rem;
+  }
+  .view-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: .35rem .65rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: .35rem;
+    color: var(--muted);
+    font-size: .78rem;
+    font-family: 'Inter', sans-serif;
+    transition: all .18s;
+  }
+  .view-btn svg { width: 14px; height: 14px; }
+  .view-btn:hover, .view-btn.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(91,110,245,.08);
+  }
+
+  /* ── Grid ── */
+  .grid-wrap {
+    position: relative;
+    z-index: 5;
+    padding: 0 2rem 4rem;
+  }
+
+  #profile-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 1rem;
+    transition: grid-template-columns .3s;
+  }
+  #profile-grid.view-large {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  }
+  #profile-grid.view-small {
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  }
+
+  /* ── Profile card ── */
+  .profile-card {
+    position: relative;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    overflow: hidden;
+    cursor: pointer;
+    border: 2px solid var(--border);
+    background: var(--card);
+    transition: transform .28s cubic-bezier(.22,1,.36,1),
+                border-color .28s,
+                box-shadow .28s;
+    will-change: transform;
+  }
+  .profile-card::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    opacity: 0;
+    z-index: 1;
+    transition: opacity .28s;
+    pointer-events: none;
+  }
+  .profile-card::after {
+    content: '';
+    position: absolute;
+    inset: 2px;
+    border-radius: 50%;
+    background: var(--card);
+    z-index: 2;
+    pointer-events: none;
+  }
+  .profile-card img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 3;
+    display: block;
+    transition: transform .4s cubic-bezier(.22,1,.36,1), filter .3s;
+    filter: saturate(.92) brightness(.95);
+  }
+  .profile-card .overlay {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, rgba(91,110,245,.25) 0%, transparent 70%);
+    z-index: 4;
+    opacity: 0;
+    transition: opacity .28s;
+    pointer-events: none;
+  }
+  .profile-card:hover {
+    transform: scale(1.07) translateY(-4px);
+    border-color: transparent;
+    box-shadow: 0 0 0 2px var(--accent), 0 8px 40px var(--glow), 0 0 60px var(--glow2);
+  }
+  .profile-card:hover::before { opacity: 1; }
+  .profile-card:hover img {
+    transform: scale(1.06);
+    filter: saturate(1.05) brightness(1.02);
+  }
+  .profile-card:hover .overlay { opacity: 1; }
+
+  /* Loading shimmer */
+  .profile-card.loading img { opacity: 0; }
+  .profile-card.loading::after {
+    background: linear-gradient(90deg, var(--card) 25%, var(--surface) 50%, var(--card) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s infinite;
+  }
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* ── Lightbox ── */
+  #lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(4,4,12,.94);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .3s;
+  }
+  #lightbox.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+  .lb-inner {
+    position: relative;
+    max-width: min(520px, 90vw);
+    max-height: 92vh;
+    width: 100%;
+  }
+  .lb-img-wrap {
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid rgba(91,110,245,.3);
+    box-shadow: 0 0 80px rgba(91,110,245,.3), 0 0 120px rgba(0,200,255,.15);
+    aspect-ratio: 1;
+    background: var(--card);
+  }
+  .lb-img-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .lb-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(13,13,28,.9);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    width: 44px; height: 44px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    color: var(--text);
+    transition: border-color .2s, background .2s;
+    z-index: 10;
+  }
+  .lb-nav:hover {
+    border-color: var(--accent);
+    background: rgba(91,110,245,.15);
+    color: var(--accent);
+  }
+  .lb-nav.prev { left: -56px; }
+  .lb-nav.next { right: -56px; }
+  .lb-nav svg { width: 18px; height: 18px; }
+  .lb-close {
+    position: absolute;
+    top: -16px; right: -16px;
+    background: rgba(13,13,28,.95);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    width: 36px; height: 36px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    color: var(--muted);
+    transition: color .2s, border-color .2s;
+    z-index: 10;
+  }
+  .lb-close:hover { color: var(--white); border-color: var(--accent); }
+  .lb-counter {
+    text-align: center;
+    margin-top: .9rem;
+    font-size: .78rem;
+    color: var(--muted);
+    font-family: 'Space Grotesk', sans-serif;
+    letter-spacing: .08em;
+  }
+  .lb-counter span { color: var(--accent2); font-weight: 600; }
+
+  /* ── No results ── */
+  #no-results {
+    display: none;
+    text-align: center;
+    padding: 5rem 2rem;
+    color: var(--muted);
+    font-size: .92rem;
+  }
+  #no-results svg {
+    width: 48px; height: 48px;
+    margin: 0 auto 1rem;
+    opacity: .3;
+    display: block;
+  }
+
+  /* ── Footer ── */
+  footer {
+    position: relative;
+    z-index: 5;
+    text-align: center;
+    padding: 2rem;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: .75rem;
+    letter-spacing: .05em;
+  }
+  footer span {
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 600;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 700px) {
+    header { padding: 1rem 1.2rem; }
+    .hero-strip { padding: 2.5rem 1.2rem 1.8rem; }
+    .filter-bar { padding: 0 1.2rem 1.5rem; }
+    .grid-wrap { padding: 0 1rem 3rem; }
+    #search { width: 130px; }
+    .lb-nav.prev { left: -42px; }
+    .lb-nav.next { right: -42px; }
+    .lb-nav { width: 36px; height: 36px; }
+  }
+  @media (max-width: 440px) {
+    .lb-nav { display: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .profile-card, .profile-card img { transition: none; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="neural-bg"></canvas>
+
+<!-- Header -->
+<header>
+  <a class="brand" href="#">
+    <div class="brand-icon">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="5" cy="5" r="2" fill="white"/>
+        <circle cx="19" cy="5" r="2" fill="white"/>
+        <circle cx="12" cy="12" r="2" fill="white"/>
+        <circle cx="5" cy="19" r="2" fill="white"/>
+        <circle cx="19" cy="19" r="2" fill="white"/>
+        <line x1="5" y1="5" x2="12" y2="12" stroke="white" stroke-width="1.2" opacity=".6"/>
+        <line x1="19" y1="5" x2="12" y2="12" stroke="white" stroke-width="1.2" opacity=".6"/>
+        <line x1="5" y1="19" x2="12" y2="12" stroke="white" stroke-width="1.2" opacity=".6"/>
+        <line x1="19" y1="19" x2="12" y2="12" stroke="white" stroke-width="1.2" opacity=".6"/>
+        <line x1="5" y1="5" x2="19" y2="5" stroke="white" stroke-width="1.2" opacity=".3"/>
+        <line x1="5" y1="19" x2="19" y2="19" stroke="white" stroke-width="1.2" opacity=".3"/>
+      </svg>
+    </div>
+    <span class="brand-name">Neura<span>Link</span></span>
+  </a>
+  <div class="header-right">
+    <div class="count-badge">Profiles <span id="visible-count">0</span></div>
+    <div class="search-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+      <input id="search" type="search" placeholder="Search…">
+    </div>
+  </div>
+</header>
+
+<!-- Hero -->
+<section class="hero-strip">
+  <span class="hero-eyebrow">Visual Directory</span>
+  <h1 class="hero-title">Connected<br><span class="gradient-text">Identities</span></h1>
+  <p class="hero-sub">A professional network of verified individuals — organised, elegant, and always accessible.</p>
+</section>
+
+<!-- Filter / View toggle -->
+<div class="filter-bar">
+  <span class="filter-label">View</span>
+  <button class="view-btn" id="btn-small" title="Compact">
+    <svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="4" height="4" rx="1"/><rect x="10" y="3" width="4" height="4" rx="1"/><rect x="17" y="3" width="4" height="4" rx="1"/><rect x="3" y="10" width="4" height="4" rx="1"/><rect x="10" y="10" width="4" height="4" rx="1"/><rect x="17" y="10" width="4" height="4" rx="1"/><rect x="3" y="17" width="4" height="4" rx="1"/><rect x="10" y="17" width="4" height="4" rx="1"/><rect x="17" y="17" width="4" height="4" rx="1"/></svg>
+    Compact
+  </button>
+  <button class="view-btn active" id="btn-med" title="Default">
+    <svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    Default
+  </button>
+  <button class="view-btn" id="btn-large" title="Large">
+    <svg viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="2" width="10" height="10" rx="1"/><rect x="14" y="2" width="8" height="8" rx="1"/><rect x="2" y="14" width="8" height="8" rx="1"/><rect x="14" y="14" width="8" height="8" rx="1"/></svg>
+    Large
+  </button>
+</div>
+
+<!-- Grid -->
+<div class="grid-wrap">
+  <div id="profile-grid"></div>
+  <div id="no-results">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+      <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+    </svg>
+    No profiles match your search.
+  </div>
+</div>
+
+<!-- Lightbox -->
+<div id="lightbox" role="dialog" aria-modal="true">
+  <div class="lb-inner">
+    <div class="lb-img-wrap">
+      <img id="lb-img" src="" alt="Profile photo">
+    </div>
+    <button class="lb-nav prev" id="lb-prev" aria-label="Previous">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <button class="lb-nav next" id="lb-next" aria-label="Next">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+    </button>
+    <button class="lb-close" id="lb-close" aria-label="Close">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+    <div class="lb-counter"><span id="lb-num">1</span> / <span id="lb-total">0</span></div>
+  </div>
+</div>
+
+<footer>
+  <span>Neura Link</span> &nbsp;·&nbsp; Professional Visual Directory &nbsp;·&nbsp; Secure &amp; Private
+</footer>
+
+<script>
+/* ─────────────────────────────────────────────
+   Neural Background Canvas
+───────────────────────────────────────────── */
+(function() {
+  const canvas = document.getElementById('neural-bg');
+  const ctx = canvas.getContext('2d');
+  let W, H, nodes, animId;
+  const NODE_COUNT = 60;
+  const MAX_DIST = 160;
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+
+  function initNodes() {
+    nodes = Array.from({ length: NODE_COUNT }, () => ({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      vx: (Math.random() - .5) * .35,
+      vy: (Math.random() - .5) * .35,
+      r: Math.random() * 1.8 + .6,
+    }));
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    // Update
+    for (const n of nodes) {
+      n.x += n.vx; n.y += n.vy;
+      if (n.x < 0 || n.x > W) n.vx *= -1;
+      if (n.y < 0 || n.y > H) n.vy *= -1;
+    }
+    // Lines
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const dx = nodes[i].x - nodes[j].x;
+        const dy = nodes[i].y - nodes[j].y;
+        const d = Math.hypot(dx, dy);
+        if (d < MAX_DIST) {
+          const alpha = (1 - d / MAX_DIST) * .45;
+          ctx.beginPath();
+          ctx.moveTo(nodes[i].x, nodes[i].y);
+          ctx.lineTo(nodes[j].x, nodes[j].y);
+          ctx.strokeStyle = `rgba(91,110,245,${alpha})`;
+          ctx.lineWidth = .6;
+          ctx.stroke();
+        }
+      }
+    }
+    // Dots
+    for (const n of nodes) {
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(0,200,255,.6)';
+      ctx.fill();
+    }
+    animId = requestAnimationFrame(draw);
+  }
+
+  resize();
+  initNodes();
+  draw();
+  window.addEventListener('resize', () => { resize(); initNodes(); });
+})();
+
+/* ─────────────────────────────────────────────
+   Image Data
+───────────────────────────────────────────── */
+const BASE = 'https://raw.githubusercontent.com/InfiniteProfile/NeuraLink/main/';
+
+const files = [
+  "FB_IMG_1782222700818.jpg","FB_IMG_1782222709682.jpg","FB_IMG_1782222711735.jpg","FB_IMG_1782222713710.jpg",
+  "FB_IMG_1782222715713.jpg","FB_IMG_1782222724749.jpg","FB_IMG_1782222729445.jpg","FB_IMG_1782222733042.jpg",
+  "FB_IMG_1782222736468.jpg","FB_IMG_1782222743773.jpg","FB_IMG_1782222745019.jpg","FB_IMG_1782222750540.jpg",
+  "FB_IMG_1782222759211.jpg","FB_IMG_1782222760655.jpg","FB_IMG_1782222763659.jpg","FB_IMG_1782222767287.jpg",
+  "FB_IMG_1782222773793.jpg","FB_IMG_1782222775439.jpg","FB_IMG_1782222777080.jpg","FB_IMG_1782222778657.jpg",
+  "FB_IMG_1782222780510.jpg","FB_IMG_1782222787038.jpg","FB_IMG_1782222795485.jpg",
+  "FB_IMG_1782239750902.jpg","FB_IMG_1782239762511.jpg","FB_IMG_1782239765452.jpg","FB_IMG_1782239770719.jpg",
+  "FB_IMG_1782239772631.jpg","FB_IMG_1782239774231.jpg","FB_IMG_1782239777003.jpg","FB_IMG_1782239778511.jpg",
+  "FB_IMG_1782239782047.jpg","FB_IMG_1782239782126.jpg","FB_IMG_1782239787579.jpg","FB_IMG_1782239792435.jpg",
+  "FB_IMG_1782239797246.jpg","FB_IMG_1782239807332.jpg","FB_IMG_1782239809408.jpg","FB_IMG_1782239812105.jpg",
+  "FB_IMG_1782239856495.jpg","FB_IMG_1782239860620.jpg","FB_IMG_1782239866595.jpg","FB_IMG_1782239868976.jpg",
+  "FB_IMG_1782239877775.jpg","FB_IMG_1782239882390.jpg","FB_IMG_1782239884507.jpg","FB_IMG_1782239886477.jpg",
+  "FB_IMG_1782239888612.jpg","FB_IMG_1782239891904.jpg","FB_IMG_1782239894046.jpg","FB_IMG_1782239896430.jpg",
+  "FB_IMG_1782239898604.jpg","FB_IMG_1782239900802.jpg","FB_IMG_1782239903414.jpg","FB_IMG_1782239906264.jpg",
+  "FB_IMG_1782239908794.jpg","FB_IMG_1782239911138.jpg","FB_IMG_1782239913396.jpg","FB_IMG_1782239916494.jpg",
+  "FB_IMG_1782239918613.jpg","FB_IMG_1782239920902.jpg","FB_IMG_1782239922511.jpg","FB_IMG_1782239925875.jpg",
+  "FB_IMG_1782239926929.jpg","FB_IMG_1782239928277.jpg","FB_IMG_1782239929977.jpg","FB_IMG_1782239932032.jpg",
+  "FB_IMG_1782239937046.jpg","FB_IMG_1782239938982.jpg","FB_IMG_1782239940786.jpg","FB_IMG_1782239942843.jpg",
+  "FB_IMG_1782239944907.jpg","FB_IMG_1782239947545.jpg","FB_IMG_1782239948713.jpg","FB_IMG_1782239950738.jpg",
+  "FB_IMG_1782239952908.jpg","FB_IMG_1782239954784.jpg","FB_IMG_1782239957852.jpg","FB_IMG_1782239958099.jpg",
+  "FB_IMG_1782239960346.jpg","FB_IMG_1782239969028.jpg","FB_IMG_1782239974479.jpg","FB_IMG_1782239979677.jpg",
+  "FB_IMG_1782239983449.jpg","FB_IMG_1782239989385.jpg","FB_IMG_1782239994433.jpg","FB_IMG_1782239996425.jpg",
+  "FB_IMG_1782239998544.jpg","FB_IMG_1782239999762.jpg","FB_IMG_1782240001981.jpg","FB_IMG_1782240003227.jpg",
+  "FB_IMG_1782240004982.jpg","FB_IMG_1782240010712.jpg",
+  "FB_IMG_1782240799042.jpg","FB_IMG_1782240804119.jpg","FB_IMG_1782240808641.jpg","FB_IMG_1782240812933.jpg",
+  "FB_IMG_1782240819615.jpg","FB_IMG_1782240822784.jpg","FB_IMG_1782240828441.jpg","FB_IMG_1782240830553.jpg",
+  "FB_IMG_1782240840792.jpg","FB_IMG_1782240845177.jpg","FB_IMG_1782240848812.jpg","FB_IMG_1782240855940.jpg",
+  "FB_IMG_1782240858774.jpg","FB_IMG_1782240863630.jpg","FB_IMG_1782240866137.jpg","FB_IMG_1782240868193.jpg",
+  "FB_IMG_1782240870342.jpg","FB_IMG_1782240872491.jpg","FB_IMG_1782240874459.jpg","FB_IMG_1782240876377.jpg",
+  "FB_IMG_1782240883556.jpg","FB_IMG_1782240886802.jpg","FB_IMG_1782240934643.jpg","FB_IMG_1782240940426.jpg",
+  "FB_IMG_1782240941978.jpg","FB_IMG_1782240943681.jpg","FB_IMG_1782240945353.jpg","FB_IMG_1782240947103.jpg",
+  "FB_IMG_1782240954182.jpg","FB_IMG_1782240958347.jpg","FB_IMG_1782240961332.jpg","FB_IMG_1782240964878.jpg",
+  "FB_IMG_1782240969906.jpg","FB_IMG_1782240991168.jpg","FB_IMG_1782240994643.jpg","FB_IMG_1782240998584.jpg",
+  "FB_IMG_1782241002772.jpg","FB_IMG_1782241007015.jpg","FB_IMG_1782241013065.jpg","FB_IMG_1782241021719.jpg",
+  "FB_IMG_1782241027891.jpg","FB_IMG_1782241032114.jpg","FB_IMG_1782241036152.jpg","FB_IMG_1782241038107.jpg",
+  "FB_IMG_1782241039002.jpg","FB_IMG_1782241044103.jpg","FB_IMG_1782241046335.jpg","FB_IMG_1782241049045.jpg",
+  "FB_IMG_1782241052196.jpg","FB_IMG_1782241052840.jpg","FB_IMG_1782241057761.jpg","FB_IMG_1782241070766.jpg",
+  "FB_IMG_1782241073729.jpg","FB_IMG_1782241075647.jpg","FB_IMG_1782241077750.jpg","FB_IMG_1782241079572.jpg",
+  "FB_IMG_1782241081839.jpg","FB_IMG_1782241084110.jpg","FB_IMG_1782241086030.jpg","FB_IMG_1782241087298.jpg",
+  "FB_IMG_1782241089129.jpg","FB_IMG_1782241091705.jpg","FB_IMG_1782241093372.jpg","FB_IMG_1782241095943.jpg",
+  "FB_IMG_1782241098060.jpg","FB_IMG_1782241099973.jpg","FB_IMG_1782241102281.jpg","FB_IMG_1782241103735.jpg",
+  "FB_IMG_1782241108075.jpg","FB_IMG_1782241109557.jpg","FB_IMG_1782241112909.jpg","FB_IMG_1782241114875.jpg",
+  "FB_IMG_1782241116975.jpg","FB_IMG_1782241118116.jpg","FB_IMG_1782241119727.jpg","FB_IMG_1782241121796.jpg",
+  "FB_IMG_1782241123481.jpg","FB_IMG_1782241125411.jpg","FB_IMG_1782241127619.jpg","FB_IMG_1782241129899.jpg",
+  "FB_IMG_1782241131505.jpg","FB_IMG_1782241133669.jpg","FB_IMG_1782241135869.jpg","FB_IMG_1782241137548.jpg",
+  "FB_IMG_1782241140103.jpg","FB_IMG_1782241142173.jpg","FB_IMG_1782241145058.jpg","FB_IMG_1782241147958.jpg",
+  "FB_IMG_1782241149119.jpg","FB_IMG_1782241152332.jpg","FB_IMG_1782241156402.jpg","FB_IMG_1782241158122.jpg",
+  "FB_IMG_1782241159896.jpg","FB_IMG_1782241162405.jpg","FB_IMG_1782241164488.jpg","FB_IMG_1782241166342.jpg",
+  "FB_IMG_1782241168063.jpg","FB_IMG_1782241170150.jpg","FB_IMG_1782241172058.jpg","FB_IMG_1782241174120.jpg",
+  "FB_IMG_1782241176131.jpg","FB_IMG_1782241178563.jpg","FB_IMG_1782241180686.jpg","FB_IMG_1782241182589.jpg",
+  "FB_IMG_1782241185042.jpg","FB_IMG_1782241186876.jpg","FB_IMG_1782241189741.jpg","FB_IMG_1782241191152.jpg",
+  "FB_IMG_1782241193245.jpg","FB_IMG_1782241195045.jpg","FB_IMG_1782241196726.jpg","FB_IMG_1782241198857.jpg",
+  "FB_IMG_1782241201006.jpg","FB_IMG_1782241203783.jpg","FB_IMG_1782241204784.jpg","FB_IMG_1782241206862.jpg",
+  "FB_IMG_1782241211057.jpg","FB_IMG_1782241213184.jpg","FB_IMG_1782241214862.jpg","FB_IMG_1782241216853.jpg",
+  "FB_IMG_1782241220061.jpg","FB_IMG_1782241222039.jpg","FB_IMG_1782241223692.jpg","FB_IMG_1782241225327.jpg",
+  "FB_IMG_1782241226222.jpg","FB_IMG_1782241228057.jpg","FB_IMG_1782241231347.jpg","FB_IMG_1782241232146.jpg",
+  "FB_IMG_1782241235577.jpg","FB_IMG_1782241236448.jpg","FB_IMG_1782241236924.jpg","FB_IMG_1782241239644.jpg",
+  "FB_IMG_1782241241182.jpg","FB_IMG_1782241242801.jpg","FB_IMG_1782241244963.jpg","FB_IMG_1782241245963.jpg",
+  "FB_IMG_1782241248154.jpg","FB_IMG_1782241249504.jpg","FB_IMG_1782241251560.jpg","FB_IMG_1782241253160.jpg",
+  "FB_IMG_1782241254958.jpg","FB_IMG_1782241257335.jpg","FB_IMG_1782241259380.jpg","FB_IMG_1782241261381.jpg",
+  "FB_IMG_1782241270340.jpg","FB_IMG_1782241284977.jpg","FB_IMG_1782241287099.jpg","FB_IMG_1782241289171.jpg",
+  "FB_IMG_1782241291810.jpg","FB_IMG_1782241293461.jpg","FB_IMG_1782241296414.jpg","FB_IMG_1782241298094.jpg",
+  "FB_IMG_1782241301026.jpg","FB_IMG_1782241303174.jpg","FB_IMG_1782241305310.jpg","FB_IMG_1782241307676.jpg",
+  "FB_IMG_1782241309146.jpg","FB_IMG_1782241310673.jpg","FB_IMG_1782241313847.jpg","FB_IMG_1782241315200.jpg",
+  "FB_IMG_1782241317392.jpg","FB_IMG_1782241319299.jpg","FB_IMG_1782241321273.jpg","FB_IMG_1782241325352.jpg",
+  "FB_IMG_1782241327811.jpg","FB_IMG_1782241329815.jpg","FB_IMG_1782241331883.jpg","FB_IMG_1782241334251.jpg",
+  "FB_IMG_1782241339105.jpg","FB_IMG_1782241340953.jpg","FB_IMG_1782241342676.jpg","FB_IMG_1782241346247.jpg",
+  "FB_IMG_1782241347379.jpg","FB_IMG_1782241348631.jpg","FB_IMG_1782241350817.jpg","FB_IMG_1782241352840.jpg",
+  "FB_IMG_1782241354972.jpg","FB_IMG_1782241357605.jpg","FB_IMG_1782241359844.jpg","FB_IMG_1782241361747.jpg",
+  "FB_IMG_1782241364782.jpg","FB_IMG_1782241367133.jpg","FB_IMG_1782241371959.jpg","FB_IMG_1782241373874.jpg",
+  "FB_IMG_1782241375715.jpg","FB_IMG_1782241378146.jpg","FB_IMG_1782241381232.jpg","FB_IMG_1782241383235.jpg",
+  "FB_IMG_1782241384869.jpg","FB_IMG_1782241388348.jpg","FB_IMG_1782241390052.jpg","FB_IMG_1782241392579.jpg",
+  "FB_IMG_1782241395033.jpg","FB_IMG_1782241397452.jpg","FB_IMG_1782241399556.jpg","FB_IMG_1782241402013.jpg",
+  "FB_IMG_1782241404171.jpg","FB_IMG_1782241406851.jpg","FB_IMG_1782241408542.jpg","FB_IMG_1782241420500.jpg",
+  "FB_IMG_1782241425186.jpg","FB_IMG_1782241429423.jpg","FB_IMG_1782241431062.jpg","FB_IMG_1782241434146.jpg",
+  "FB_IMG_1782241442560.jpg","FB_IMG_1782241444799.jpg","FB_IMG_1782241446386.jpg","FB_IMG_1782241448745.jpg",
+  "FB_IMG_1782241451334.jpg","FB_IMG_1782241453643.jpg","FB_IMG_1782241456318.jpg","FB_IMG_1782241463159.jpg",
+  "FB_IMG_1782241464817.jpg","FB_IMG_1782241467511.jpg","FB_IMG_1782241469579.jpg","FB_IMG_1782241479847.jpg",
+  "FB_IMG_1782241482158.jpg","FB_IMG_1782241483828.jpg","FB_IMG_1782241486014.jpg","FB_IMG_1782241491140.jpg",
+  "FB_IMG_1782241494849.jpg","FB_IMG_1782241501260.jpg","FB_IMG_1782241505607.jpg","FB_IMG_1782241507866.jpg",
+  "FB_IMG_1782241510507.jpg","FB_IMG_1782241512678.jpg","FB_IMG_1782241521092.jpg","FB_IMG_1782241533363.jpg",
+  "FB_IMG_1782241535759.jpg","FB_IMG_1782241538164.jpg","FB_IMG_1782241540053.jpg","FB_IMG_1782241542098.jpg",
+  "FB_IMG_1782241545222.jpg","FB_IMG_1782241549124.jpg","FB_IMG_1782241552082.jpg","FB_IMG_1782241553991.jpg",
+  "FB_IMG_1782241560966.jpg","FB_IMG_1782241563089.jpg","FB_IMG_1782241571824.jpg","FB_IMG_1782241584044.jpg",
+  "FB_IMG_1782241592148.jpg","FB_IMG_1782241599943.jpg","FB_IMG_1782241603413.jpg","FB_IMG_1782241611621.jpg",
+  "FB_IMG_1782241615574.jpg",
+  "FB_IMG_1782251380211.jpg","FB_IMG_1782251394869.jpg","FB_IMG_1782251404601.jpg","FB_IMG_1782251421260.jpg",
+  "FB_IMG_1782251684273.jpg","FB_IMG_1782251688090.jpg",
+  "FB_IMG_1782253857302.jpg","FB_IMG_1782253861386.jpg","FB_IMG_1782253951290.jpg","FB_IMG_1782253953862.jpg",
+  "FB_IMG_1782253959033.jpg","FB_IMG_1782253970045.jpg","FB_IMG_1782253972049.jpg","FB_IMG_1782253974424.jpg",
+  "FB_IMG_1782253976193.jpg","FB_IMG_1782253998064.jpg","FB_IMG_1782253999993.jpg","FB_IMG_1782254001532.jpg",
+  "FB_IMG_1782254003177.jpg","FB_IMG_1782254005197.jpg","FB_IMG_1782254047665.jpg",
+  "FB_IMG_1782254518820.jpg","FB_IMG_1782254525407.jpg","FB_IMG_1782254533467.jpg","FB_IMG_1782254538274.jpg",
+  "FB_IMG_1782254540136.jpg","FB_IMG_1782254552231.jpg","FB_IMG_1782254559201.jpg","FB_IMG_1782254561135.jpg",
+  "FB_IMG_1782254562959.jpg","FB_IMG_1782254564732.jpg","FB_IMG_1782254581227.jpg","FB_IMG_1782254583293.jpg",
+  "FB_IMG_1782254585336.jpg","FB_IMG_1782254590478.jpg","FB_IMG_1782254594324.jpg","FB_IMG_1782254598547.jpg",
+  "FB_IMG_1782254603999.jpg","FB_IMG_1782254607228.jpg","FB_IMG_1782254614771.jpg","FB_IMG_1782254624998.jpg",
+  "FB_IMG_1782291785765.jpg","FB_IMG_1782291787644.jpg","FB_IMG_1782291793295.jpg","FB_IMG_1782291803879.jpg",
+  "FB_IMG_1782291816196.jpg","FB_IMG_1782291822392.jpg","FB_IMG_1782291831017.jpg","FB_IMG_1782291833179.jpg",
+  "FB_IMG_1782291834057.jpg","FB_IMG_1782291836128.jpg","FB_IMG_1782291838506.jpg","FB_IMG_1782291839422.jpg",
+  "FB_IMG_1782291840368.jpg","FB_IMG_1782291842111.jpg","FB_IMG_1782291843008.jpg","FB_IMG_1782291967170.jpg",
+  "FB_IMG_1782291972811.jpg","FB_IMG_1782291975490.jpg","FB_IMG_1782292014561.jpg","FB_IMG_1782292016926.jpg",
+  "FB_IMG_1782292018649.jpg","FB_IMG_1782292021164.jpg","FB_IMG_1782292023839.jpg","FB_IMG_1782292049969.jpg",
+  "FB_IMG_1782292059165.jpg","FB_IMG_1782292062855.jpg","FB_IMG_1782292064226.jpg","FB_IMG_1782292064374.jpg",
+  "FB_IMG_1782292067860.jpg","FB_IMG_1782292075291.jpg","FB_IMG_1782292079874.jpg","FB_IMG_1782292086276.jpg",
+  "FB_IMG_1782292088239.jpg","FB_IMG_1782292096048.jpg",
+  "FB_IMG_1782308600926.jpg","FB_IMG_1782308605664.jpg","FB_IMG_1782308610554.jpg","FB_IMG_1782308617282.jpg",
+  "FB_IMG_1782308618609.jpg","FB_IMG_1782308619995.jpg","FB_IMG_1782308621685.jpg","FB_IMG_1782308629723.jpg",
+  "FB_IMG_1782308635388.jpg","FB_IMG_1782308639957.jpg","FB_IMG_1782308646166.jpg","FB_IMG_1782308650016.jpg",
+  "FB_IMG_1782308651418.jpg","FB_IMG_1782308674143.jpg","FB_IMG_1782308677952.jpg","FB_IMG_1782308688298.jpg",
+  "FB_IMG_1782308691917.jpg","FB_IMG_1782308694555.jpg","FB_IMG_1782308699051.jpg","FB_IMG_1782308730398.jpg",
+  "FB_IMG_1782308732188.jpg","FB_IMG_1782308733839.jpg","FB_IMG_1782308735912.jpg","FB_IMG_1782308737499.jpg",
+  "FB_IMG_1782308743634.jpg",
+  "FB_IMG_1782325062630.jpg","FB_IMG_1782325069181.jpg","FB_IMG_1782325071950.jpg","FB_IMG_1782325087882.jpg",
+  "FB_IMG_1782325089771.jpg","FB_IMG_1782325095635.jpg","FB_IMG_1782325105061.jpg","FB_IMG_1782325107226.jpg",
+  "FB_IMG_1782325108806.jpg","FB_IMG_1782325112160.jpg","FB_IMG_1782325113897.jpg","FB_IMG_1782325115428.jpg",
+  "FB_IMG_1782325117535.jpg","FB_IMG_1782325119443.jpg","FB_IMG_1782325126076.jpg","FB_IMG_1782325142699.jpg",
+  "FB_IMG_1782325151522.jpg","FB_IMG_1782325157144.jpg","FB_IMG_1782325160826.jpg","FB_IMG_1782325167753.jpg",
+  "FB_IMG_1782325169279.jpg","FB_IMG_1782325171596.jpg","FB_IMG_1782325183653.jpg","FB_IMG_1782325185498.jpg",
+  "FB_IMG_1782325188669.jpg","FB_IMG_1782325194118.jpg","FB_IMG_1782325196277.jpg","FB_IMG_1782325198249.jpg",
+  "FB_IMG_1782325200594.jpg","FB_IMG_1782325201664.jpg","FB_IMG_1782325203731.jpg","FB_IMG_1782325207335.jpg",
+  "FB_IMG_1782325213043.jpg","FB_IMG_1782325216033.jpg","FB_IMG_1782325218230.jpg","FB_IMG_1782325233321.jpg",
+  "FB_IMG_1782325237920.jpg","FB_IMG_1782325245205.jpg","FB_IMG_1782325247399.jpg","FB_IMG_1782325249590.jpg",
+  "FB_IMG_1782325267246.jpg","FB_IMG_1782325268553.jpg","FB_IMG_1782325270528.jpg","FB_IMG_1782325272332.jpg",
+  "FB_IMG_1782325283624.jpg","FB_IMG_1782325286701.jpg","FB_IMG_1782325288259.jpg","FB_IMG_1782325289214.jpg",
+  "FB_IMG_1782325290716.jpg","FB_IMG_1782325292630.jpg","FB_IMG_1782325294382.jpg","FB_IMG_1782325296119.jpg",
+  "FB_IMG_1782325305189.jpg","FB_IMG_1782325306787.jpg","FB_IMG_1782325308324.jpg","FB_IMG_1782325309890.jpg",
+  "FB_IMG_1782326429772.jpg","FB_IMG_1782326444980.jpg","FB_IMG_1782326446640.jpg","FB_IMG_1782326448019.jpg",
+  "FB_IMG_1782326450476.jpg","FB_IMG_1782326452222.jpg","FB_IMG_1782326453804.jpg","FB_IMG_1782326455493.jpg",
+  "FB_IMG_1782326457573.jpg","FB_IMG_1782326458838.jpg","FB_IMG_1782326461726.jpg","FB_IMG_1782326464069.jpg",
+  "FB_IMG_1782326465860.jpg","FB_IMG_1782326466905.jpg","FB_IMG_1782326468357.jpg","FB_IMG_1782326469859.jpg",
+  "FB_IMG_1782326471219.jpg","FB_IMG_1782326472507.jpg","FB_IMG_1782326477123.jpg","FB_IMG_1782326479249.jpg",
+  "FB_IMG_1782326481183.jpg","FB_IMG_1782326484597.jpg","FB_IMG_1782326487221.jpg","FB_IMG_1782326488997.jpg",
+  "FB_IMG_1782326492759.jpg","FB_IMG_1782326494669.jpg","FB_IMG_1782326497303.jpg","FB_IMG_1782326499393.jpg",
+  "FB_IMG_1782326501781.jpg","FB_IMG_1782326505150.jpg","FB_IMG_1782326509578.jpg","FB_IMG_1782326512770.jpg",
+  "FB_IMG_1782326515149.jpg","FB_IMG_1782326517609.jpg","FB_IMG_1782326520831.jpg","FB_IMG_1782326522334.jpg",
+  "FB_IMG_1782326524901.jpg","FB_IMG_1782326528476.jpg","FB_IMG_1782326529843.jpg","FB_IMG_1782326531220.jpg",
+  "FB_IMG_1782326534766.jpg","FB_IMG_1782326536784.jpg","FB_IMG_1782326542184.jpg","FB_IMG_1782326544276.jpg",
+  "FB_IMG_1782326547590.jpg","FB_IMG_1782326551674.jpg","FB_IMG_1782326554440.jpg","FB_IMG_1782326556802.jpg",
+  "FB_IMG_1782326558718.jpg","FB_IMG_1782326560300.jpg","FB_IMG_1782326563790.jpg","FB_IMG_1782326571553.jpg",
+  "FB_IMG_1782326577318.jpg","FB_IMG_1782326585149.jpg","FB_IMG_1782326589355.jpg",
+  "IMG_20260625_005718_170.jpg"
+];
+
+const grid = document.getElementById('profile-grid');
+const countEl = document.getElementById('visible-count');
+const noResults = document.getElementById('no-results');
+
+/* ── Render cards ── */
+let visibleIndices = files.map((_, i) => i);
+
+function renderGrid(indices) {
+  grid.innerHTML = '';
+  if (indices.length === 0) {
+    noResults.style.display = 'block';
+    countEl.textContent = '0';
+    return;
+  }
+  noResults.style.display = 'none';
+  countEl.textContent = indices.length;
+  visibleIndices = indices;
+
+  indices.forEach((fileIdx, pos) => {
+    const card = document.createElement('div');
+    card.className = 'profile-card loading';
+    card.dataset.index = pos;
+
+    const img = document.createElement('img');
+    img.alt = 'Profile';
+    img.loading = 'lazy';
+    img.src = BASE + files[fileIdx];
+    img.onload = () => {
+      card.classList.remove('loading');
+      img.style.opacity = '1';
+    };
+    img.onerror = () => { card.style.display = 'none'; };
+
+    const overlay = document.createElement('div');
+    overlay.className = 'overlay';
+
+    card.appendChild(img);
+    card.appendChild(overlay);
+    card.addEventListener('click', () => openLightbox(pos));
+    grid.appendChild(card);
+  });
+}
+
+renderGrid(visibleIndices);
+
+/* ── Search ── */
+document.getElementById('search').addEventListener('input', function() {
+  const q = this.value.trim().toLowerCase();
+  if (!q) { renderGrid(files.map((_, i) => i)); return; }
+  const filtered = [];
+  files.forEach((f, i) => { if (f.toLowerCase().includes(q)) filtered.push(i); });
+  renderGrid(filtered);
+});
+
+/* ── View toggles ── */
+function setView(cls, active) {
+  grid.classList.remove('view-small', 'view-large');
+  if (cls) grid.classList.add(cls);
+  document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+  active.classList.add('active');
+}
+document.getElementById('btn-small').addEventListener('click', function() { setView('view-small', this); });
+document.getElementById('btn-med').addEventListener('click',   function() { setView('', this); });
+document.getElementById('btn-large').addEventListener('click', function() { setView('view-large', this); });
+
+/* ── Lightbox ── */
+const lb = document.getElementById('lightbox');
+const lbImg = document.getElementById('lb-img');
+const lbNum = document.getElementById('lb-num');
+const lbTotal = document.getElementById('lb-total');
+let currentPos = 0;
+
+function openLightbox(pos) {
+  currentPos = pos;
+  updateLb();
+  lb.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeLightbox() {
+  lb.classList.remove('open');
+  document.body.style.overflow = '';
+}
+function updateLb() {
+  const fileIdx = visibleIndices[currentPos];
+  lbImg.src = BASE + files[fileIdx];
+  lbNum.textContent = currentPos + 1;
+  lbTotal.textContent = visibleIndices.length;
+}
+
+document.getElementById('lb-close').addEventListener('click', closeLightbox);
+document.getElementById('lb-prev').addEventListener('click', () => {
+  currentPos = (currentPos - 1 + visibleIndices.length) % visibleIndices.length;
+  updateLb();
+});
+document.getElementById('lb-next').addEventListener('click', () => {
+  currentPos = (currentPos + 1) % visibleIndices.length;
+  updateLb();
+});
+lb.addEventListener('click', e => { if (e.target === lb) closeLightbox(); });
+
+document.addEventListener('keydown', e => {
+  if (!lb.classList.contains('open')) return;
+  if (e.key === 'Escape') closeLightbox();
+  if (e.key === 'ArrowLeft') { currentPos = (currentPos - 1 + visibleIndices.length) % visibleIndices.length; updateLb(); }
+  if (e.key === 'ArrowRight') { currentPos = (currentPos + 1) % visibleIndices.length; updateLb(); }
+});
+
+/* ── Touch swipe for lightbox ── */
+let touchStartX = 0;
+lb.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
+lb.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  if (Math.abs(dx) > 50) {
+    currentPos = dx < 0
+      ? (currentPos + 1) % visibleIndices.length
+      : (currentPos - 1 + visibleIndices.length) % visibleIndices.length;
+    updateLb();
+  }
+});
+</script>
+</body>
+</html>
